@@ -2,6 +2,7 @@ package main
 
 import (
 	"./api"
+	"fmt"
 	"github.com/codegangsta/cli"
 	bw "gopkg.in/immesys/bw2bind.v5"
 	"log"
@@ -16,12 +17,12 @@ func applyArchive(c *cli.Context) error {
 	API := api.NewAPI(client, vk)
 	uri := strings.TrimSuffix(c.String("uri"), "/")
 	request := api.ArchiveRequest{
-		URI:         c.String("uri"),
-		PO:          bw.FromDotForm(c.String("po")),
-		Value:       c.String("value"),
-		Time:        c.String("time"),
-		UUID:        c.String("uuid"),
-		MetadataURI: c.String("metadataURI"),
+		URI:          c.String("uri"),
+		PO:           bw.FromDotForm(c.String("po")),
+		Value:        c.String("value"),
+		Time:         c.String("time"),
+		UUID:         c.String("uuid"),
+		MetadataURIs: c.StringSlice("metadataURI"),
 	}
 	err := API.AttachArchiveRequests(uri, &request)
 	if err != nil {
@@ -39,6 +40,23 @@ func removeRequest(c *cli.Context) error {
 	err := API.RemoveArchiveRequests(uri, false)
 	if err != nil {
 		log.Fatal(err)
+	}
+	return nil
+}
+
+func scanRequests(c *cli.Context) error {
+	client := bw.ConnectOrExit("")
+	vk := client.SetEntityFileOrExit(c.GlobalString("entity"))
+	client.OverrideAutoChainTo(true)
+	API := api.NewAPI(client, vk)
+	uri := strings.TrimSuffix(c.String("uri"), "/")
+	requests, err := API.GetArchiveRequests(uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, req := range requests {
+		fmt.Println("---------------")
+		req.Dump()
 	}
 	return nil
 }
@@ -92,9 +110,8 @@ func main() {
 					Value: "2006-01-02T15:04:05Z07:00",
 					Usage: "OPTIONAL. How to parse the timestamp",
 				},
-				cli.StringFlag{
+				cli.StringSliceFlag{
 					Name:  "metadataURI,mu",
-					Value: "",
 					Usage: "OPTIONAL. Specifies base uri <uri>/!meta/+ for metadata keys",
 				},
 			},
@@ -108,6 +125,18 @@ func main() {
 					Name:  "uri,u",
 					Value: "",
 					Usage: "URI to remove metadata !meta/giles from",
+				},
+			},
+		},
+		{
+			Name:   "scan",
+			Usage:  "Scan for archive requests",
+			Action: scanRequests,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "uri,u",
+					Value: "scratch.ns/*",
+					Usage: "Base URI to scan for metadata matching !meta/giles",
 				},
 			},
 		},

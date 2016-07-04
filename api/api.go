@@ -54,9 +54,9 @@ What does the API need to do?
 //     	// OPTIONAL. Golang time parse string
 //     	TimeParse string
 //
-//     	// OPTIONAL. a base URI to scan for metadata. If `<uri>` is provided, we
+//     	// OPTIONAL. a list of base URIs to scan for metadata. If `<uri>` is provided, we
 //     	// scan `<uri>/!meta/+` for metadata keys/values
-//     	MetadataURI string
+//     	MetadataURIs []string
 //
 //     	// OPTIONAL. a URI terminating in a metadata key that contains some kv
 //     	// structure of metadata, for example `/a/b/c/!meta/metadatahere`
@@ -77,9 +77,14 @@ func (req *ArchiveRequest) SameAs(other *ArchiveRequest) bool {
 		(req.Value == other.Value) &&
 		(req.Time == other.Time) &&
 		(req.TimeParse == other.TimeParse) &&
-		(req.MetadataURI == other.MetadataURI) &&
+		(compareStringSliceAsSet(req.MetadataURIs, other.MetadataURIs)) &&
 		(req.MetadataBlock == other.MetadataBlock) &&
 		(req.MetadataExpr == other.MetadataExpr)
+}
+
+func (req *ArchiveRequest) Dump() {
+	r := messages.ArchiveRequest(*req)
+	r.Dump()
 }
 
 // pack the object for publishing
@@ -176,6 +181,7 @@ func (api *API) GetArchiveRequests(uri string) ([]*ArchiveRequest, error) {
 				if err := po.(bw.MsgPackPayloadObject).ValueInto(&req); err != nil {
 					return requests, err
 				}
+				req.FromVK = msg.From
 				requests = append(requests, req)
 			}
 		}
@@ -243,4 +249,29 @@ func (api *API) RemoveArchiveRequest(uri string, checkOwnership bool, request *A
 		return errors.Wrap(err, "Could not set ArchiveRequests")
 	}
 	return nil
+}
+
+func compareStringSliceAsSet(s1, s2 []string) bool {
+	var (
+		found bool
+	)
+
+	if len(s1) != len(s2) {
+		return false
+	}
+
+	for _, val1 := range s1 {
+		found = false
+		for _, val2 := range s2 {
+			if val1 == val2 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	return true
 }
