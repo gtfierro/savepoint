@@ -1,18 +1,32 @@
 package main
 
 import (
-	"./api"
 	"fmt"
 	"github.com/codegangsta/cli"
+	"github.com/gtfierro/savepoint/api"
 	bw "gopkg.in/immesys/bw2bind.v5"
+	"io"
 	"log"
 	"os"
+	"os/user"
+	"path/filepath"
 	"strings"
 )
 
+func getEntityFile(filename string) string {
+	if filename == "~/.savepoint.ent" {
+		user, err := user.Current()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return filepath.Join(user.HomeDir, ".savepoint.ent")
+	}
+	return filename
+}
+
 func applyArchive(c *cli.Context) error {
 	client := bw.ConnectOrExit("")
-	vk := client.SetEntityFileOrExit(c.GlobalString("entity"))
+	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
 	uri := strings.TrimSuffix(c.String("uri"), "/")
@@ -33,7 +47,7 @@ func applyArchive(c *cli.Context) error {
 
 func removeRequest(c *cli.Context) error {
 	client := bw.ConnectOrExit("")
-	vk := client.SetEntityFileOrExit(c.GlobalString("entity"))
+	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
 	uri := strings.TrimSuffix(c.String("uri"), "/")
@@ -46,7 +60,7 @@ func removeRequest(c *cli.Context) error {
 
 func scanRequests(c *cli.Context) error {
 	client := bw.ConnectOrExit("")
-	vk := client.SetEntityFileOrExit(c.GlobalString("entity"))
+	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
 	uri := strings.TrimSuffix(c.String("uri"), "/")
@@ -61,6 +75,27 @@ func scanRequests(c *cli.Context) error {
 	return nil
 }
 
+func setDefaultEntity(c *cli.Context) error {
+	user, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+	entityFile := c.String("entity")
+	file, err := os.Create(filepath.Join(user.HomeDir, ".savepoint.ent"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	entity, err := os.Open(entityFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = io.Copy(file, entity)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "savepoint"
@@ -68,10 +103,9 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:   "entity,e",
-			Value:  "",
-			Usage:  "The entity to use",
-			EnvVar: "BW2_DEFAULT_ENTITY",
+			Name:  "entity,e",
+			Value: "~/.savepoint.ent",
+			Usage: "The entity to use",
 		},
 	}
 
@@ -137,6 +171,19 @@ func main() {
 					Name:  "uri,u",
 					Value: "scratch.ns/*",
 					Usage: "Base URI to scan for metadata matching !meta/giles",
+				},
+			},
+		},
+		{
+			Name:   "setEntity",
+			Usage:  "Set default entity for this utility to use",
+			Action: setDefaultEntity,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:   "entity,e",
+					Value:  "",
+					Usage:  "The entity to use",
+					EnvVar: "BW2_DEFAULT_ENTITY",
 				},
 			},
 		},
