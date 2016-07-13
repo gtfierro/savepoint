@@ -75,6 +75,9 @@ func ReadConfig(filename string) (*Config, error) {
 		if req.PO == 0 {
 			req.PO = bw.FromDotForm("2.0.0.0")
 		}
+		for idx, uri := range req.MetadataURIs {
+			req.MetadataURIs[idx] = config.Prefix + "/" + strings.TrimPrefix(uri, "/")
+		}
 		config.ArchiveRequests = append(config.ArchiveRequests, req.ToArchiveRequest())
 	}
 
