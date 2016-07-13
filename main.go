@@ -75,6 +75,42 @@ func scanRequests(c *cli.Context) error {
 	return nil
 }
 
+func addConfig(c *cli.Context) error {
+	config, err := api.ReadConfig(c.String("config"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := bw.ConnectOrExit("")
+	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
+	client.OverrideAutoChainTo(true)
+	API := api.NewAPI(client, vk)
+	for _, req := range config.ArchiveRequests {
+		err := API.AttachArchiveRequests(req.URI, req)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return nil
+}
+
+func rmConfig(c *cli.Context) error {
+	config, err := api.ReadConfig(c.String("config"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := bw.ConnectOrExit("")
+	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
+	client.OverrideAutoChainTo(true)
+	API := api.NewAPI(client, vk)
+	for _, req := range config.ArchiveRequests {
+		err := API.RemoveArchiveRequests(req.URI, false)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return nil
+}
+
 func setDefaultEntity(c *cli.Context) error {
 	user, err := user.Current()
 	if err != nil {
@@ -147,6 +183,30 @@ func main() {
 				cli.StringSliceFlag{
 					Name:  "metadataURI,mu",
 					Usage: "OPTIONAL. Specifies base uri <uri>/!meta/+ for metadata keys",
+				},
+			},
+		},
+		{
+			Name:   "addc",
+			Usage:  "Load archive requests from config file",
+			Action: addConfig,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "config,c",
+					Value: "archive.yml",
+					Usage: "Config file to parse for archive requests",
+				},
+			},
+		},
+		{
+			Name:   "rmc",
+			Usage:  "Remove archive requests identified by config file",
+			Action: rmConfig,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "config,c",
+					Value: "archive.yml",
+					Usage: "Config file to parse for archive requests",
 				},
 			},
 		},
