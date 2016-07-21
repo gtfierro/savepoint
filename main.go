@@ -125,7 +125,7 @@ func setDefaultEntity(c *cli.Context) error {
 func main() {
 	app := cli.NewApp()
 	app.Name = "savepoint"
-	app.Version = "0.0.4"
+	app.Version = "0.0.5"
 
 	app.Commands = []cli.Command{
 		{
