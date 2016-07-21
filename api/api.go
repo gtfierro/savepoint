@@ -54,6 +54,10 @@ What does the API need to do?
 //     	// OPTIONAL. Golang time parse string
 //     	TimeParse string
 //
+//     	// OPTIONAL. Defaults to true. If true, the archiver will call bw2bind's "GetMetadata" on the archived URI,
+//     	// which inherits metadata from each of its components
+//     	InheritMetadata bool
+//
 //     	// OPTIONAL. a list of base URIs to scan for metadata. If `<uri>` is provided, we
 //     	// scan `<uri>/!meta/+` for metadata keys/values
 //     	MetadataURIs []string
@@ -77,6 +81,7 @@ func (req *ArchiveRequest) SameAs(other *ArchiveRequest) bool {
 		(req.Value == other.Value) &&
 		(req.Time == other.Time) &&
 		(req.TimeParse == other.TimeParse) &&
+		(req.InheritMetadata == other.InheritMetadata) &&
 		(compareStringSliceAsSet(req.MetadataURIs, other.MetadataURIs)) &&
 		(req.MetadataBlock == other.MetadataBlock) &&
 		(req.MetadataExpr == other.MetadataExpr)

@@ -20,12 +20,13 @@ func applyArchive(c *cli.Context) error {
 	API := api.NewAPI(client, vk)
 	uri := strings.TrimSuffix(c.String("uri"), "/")
 	request := api.ArchiveRequest{
-		URI:          c.String("uri"),
-		PO:           bw.FromDotForm(c.String("po")),
-		Value:        c.String("value"),
-		Time:         c.String("time"),
-		UUID:         c.String("uuid"),
-		MetadataURIs: c.StringSlice("metadataURI"),
+		URI:             c.String("uri"),
+		PO:              bw.FromDotForm(c.String("po")),
+		Value:           c.String("value"),
+		Time:            c.String("time"),
+		UUID:            c.String("uuid"),
+		InheritMetadata: c.BoolT("inheritMetadata"),
+		MetadataURIs:    c.StringSlice("metadataURI"),
 	}
 	err := API.AttachArchiveRequests(uri, &request)
 	if err != nil {
@@ -160,6 +161,10 @@ func main() {
 					Name:  "parse,p",
 					Value: "2006-01-02T15:04:05Z07:00",
 					Usage: "OPTIONAL. How to parse the timestamp",
+				},
+				cli.BoolTFlag{
+					Name:  "inheritMetadata,i",
+					Usage: "OPTIONAL. Defaults to true. Inherits metadata from all URI prefixes",
 				},
 				cli.StringSliceFlag{
 					Name:  "metadataURI,mu",

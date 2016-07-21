@@ -27,28 +27,34 @@ type Config struct {
 }
 
 type DummyArchiveRequest struct {
-	URI           string   `yaml:"URI"`
-	PO            int      `yaml:"PO"`
-	UUID          string   `yaml:"UUID"`
-	Value         string   `yaml:"Value"`
-	Time          string   `yaml:"Time"`
-	TimeParse     string   `yaml:"TimeParse"`
-	MetadataURIs  []string `yaml:"MetadataURIs"`
-	MetadataBlock string   `yaml:"MetadataBlock"`
-	MetadataExpr  string   `yaml:"MetadataExpr"`
+	URI             string   `yaml:"URI"`
+	PO              int      `yaml:"PO"`
+	UUID            string   `yaml:"UUID"`
+	Value           string   `yaml:"Value"`
+	Time            string   `yaml:"Time"`
+	TimeParse       string   `yaml:"TimeParse"`
+	InheritMetadata string   `yaml:"InheritMetadata",omitempty`
+	MetadataURIs    []string `yaml:"MetadataURIs"`
+	MetadataBlock   string   `yaml:"MetadataBlock"`
+	MetadataExpr    string   `yaml:"MetadataExpr"`
 }
 
 func (d DummyArchiveRequest) ToArchiveRequest() *ArchiveRequest {
+	var doinherit = true
+	if d.InheritMetadata == "false" {
+		doinherit = false
+	}
 	return &ArchiveRequest{
-		URI:           d.URI,
-		PO:            d.PO,
-		UUID:          d.UUID,
-		Value:         d.Value,
-		Time:          d.Time,
-		TimeParse:     d.TimeParse,
-		MetadataURIs:  d.MetadataURIs,
-		MetadataBlock: d.MetadataBlock,
-		MetadataExpr:  d.MetadataExpr,
+		URI:             d.URI,
+		PO:              d.PO,
+		UUID:            d.UUID,
+		Value:           d.Value,
+		Time:            d.Time,
+		TimeParse:       d.TimeParse,
+		InheritMetadata: doinherit,
+		MetadataURIs:    d.MetadataURIs,
+		MetadataBlock:   d.MetadataBlock,
+		MetadataExpr:    d.MetadataExpr,
 	}
 }
 
