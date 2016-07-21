@@ -135,15 +135,7 @@ func setDefaultEntity(c *cli.Context) error {
 func main() {
 	app := cli.NewApp()
 	app.Name = "savepoint"
-	app.Version = "0.0.1"
-
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "entity,e",
-			Value: "~/.savepoint.ent",
-			Usage: "The entity to use",
-		},
-	}
+	app.Version = "0.0.3"
 
 	app.Commands = []cli.Command{
 		{
@@ -184,6 +176,11 @@ func main() {
 					Name:  "metadataURI,mu",
 					Usage: "OPTIONAL. Specifies base uri <uri>/!meta/+ for metadata keys",
 				},
+				cli.StringFlag{
+					Name:  "entity,e",
+					Value: "~/.savepoint.ent",
+					Usage: "The entity to use",
+				},
 			},
 		},
 		{
@@ -195,6 +192,11 @@ func main() {
 					Name:  "config,c",
 					Value: "archive.yml",
 					Usage: "Config file to parse for archive requests",
+				},
+				cli.StringFlag{
+					Name:  "entity,e",
+					Value: "~/.savepoint.ent",
+					Usage: "The entity to use",
 				},
 			},
 		},
@@ -208,6 +210,11 @@ func main() {
 					Value: "archive.yml",
 					Usage: "Config file to parse for archive requests",
 				},
+				cli.StringFlag{
+					Name:  "entity,e",
+					Value: "~/.savepoint.ent",
+					Usage: "The entity to use",
+				},
 			},
 		},
 		{
@@ -219,6 +226,11 @@ func main() {
 					Name:  "uri,u",
 					Value: "",
 					Usage: "URI to remove metadata !meta/giles from",
+				},
+				cli.StringFlag{
+					Name:  "entity,e",
+					Value: "~/.savepoint.ent",
+					Usage: "The entity to use",
 				},
 			},
 		},
@@ -232,6 +244,11 @@ func main() {
 					Value: "scratch.ns/*",
 					Usage: "Base URI to scan for metadata matching !meta/giles",
 				},
+				cli.StringFlag{
+					Name:  "entity,e",
+					Value: "~/.savepoint.ent",
+					Usage: "The entity to use",
+				},
 			},
 		},
 		{
@@ -244,6 +261,11 @@ func main() {
 					Value:  "",
 					Usage:  "The entity to use",
 					EnvVar: "BW2_DEFAULT_ENTITY",
+				},
+				cli.StringFlag{
+					Name:  "entity,e",
+					Value: "~/.savepoint.ent",
+					Usage: "The entity to use",
 				},
 			},
 		},
