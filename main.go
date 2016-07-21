@@ -13,20 +13,9 @@ import (
 	"strings"
 )
 
-func getEntityFile(filename string) string {
-	if filename == "~/.savepoint.ent" {
-		user, err := user.Current()
-		if err != nil {
-			log.Fatal(err)
-		}
-		return filepath.Join(user.HomeDir, ".savepoint.ent")
-	}
-	return filename
-}
-
 func applyArchive(c *cli.Context) error {
 	client := bw.ConnectOrExit("")
-	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
+	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
 	uri := strings.TrimSuffix(c.String("uri"), "/")
@@ -47,7 +36,7 @@ func applyArchive(c *cli.Context) error {
 
 func removeRequest(c *cli.Context) error {
 	client := bw.ConnectOrExit("")
-	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
+	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
 	uri := strings.TrimSuffix(c.String("uri"), "/")
@@ -60,7 +49,7 @@ func removeRequest(c *cli.Context) error {
 
 func scanRequests(c *cli.Context) error {
 	client := bw.ConnectOrExit("")
-	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
+	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
 	uri := strings.TrimSuffix(c.String("uri"), "/")
@@ -81,7 +70,7 @@ func addConfig(c *cli.Context) error {
 		log.Fatal(err)
 	}
 	client := bw.ConnectOrExit("")
-	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
+	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
 	for _, req := range config.ArchiveRequests {
@@ -99,7 +88,7 @@ func rmConfig(c *cli.Context) error {
 		log.Fatal(err)
 	}
 	client := bw.ConnectOrExit("")
-	vk := client.SetEntityFileOrExit(getEntityFile(c.GlobalString("entity")))
+	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
 	for _, req := range config.ArchiveRequests {
@@ -135,7 +124,7 @@ func setDefaultEntity(c *cli.Context) error {
 func main() {
 	app := cli.NewApp()
 	app.Name = "savepoint"
-	app.Version = "0.0.3"
+	app.Version = "0.0.4"
 
 	app.Commands = []cli.Command{
 		{
@@ -177,9 +166,9 @@ func main() {
 					Usage: "OPTIONAL. Specifies base uri <uri>/!meta/+ for metadata keys",
 				},
 				cli.StringFlag{
-					Name:  "entity,e",
-					Value: "~/.savepoint.ent",
-					Usage: "The entity to use",
+					Name:   "entity,e",
+					EnvVar: "BW2_DEFAULT_ENTITY",
+					Usage:  "The entity to use",
 				},
 			},
 		},
@@ -194,9 +183,9 @@ func main() {
 					Usage: "Config file to parse for archive requests",
 				},
 				cli.StringFlag{
-					Name:  "entity,e",
-					Value: "~/.savepoint.ent",
-					Usage: "The entity to use",
+					Name:   "entity,e",
+					EnvVar: "BW2_DEFAULT_ENTITY",
+					Usage:  "The entity to use",
 				},
 			},
 		},
@@ -211,9 +200,9 @@ func main() {
 					Usage: "Config file to parse for archive requests",
 				},
 				cli.StringFlag{
-					Name:  "entity,e",
-					Value: "~/.savepoint.ent",
-					Usage: "The entity to use",
+					Name:   "entity,e",
+					EnvVar: "BW2_DEFAULT_ENTITY",
+					Usage:  "The entity to use",
 				},
 			},
 		},
@@ -228,8 +217,9 @@ func main() {
 					Usage: "URI to remove metadata !meta/giles from",
 				},
 				cli.StringFlag{
-					Name:  "entity,e",
-					Value: "~/.savepoint.ent",
+					Name:   "entity,e",
+					EnvVar: "BW2_DEFAULT_ENTITY",
+
 					Usage: "The entity to use",
 				},
 			},
@@ -245,9 +235,9 @@ func main() {
 					Usage: "Base URI to scan for metadata matching !meta/giles",
 				},
 				cli.StringFlag{
-					Name:  "entity,e",
-					Value: "~/.savepoint.ent",
-					Usage: "The entity to use",
+					Name:   "entity,e",
+					EnvVar: "BW2_DEFAULT_ENTITY",
+					Usage:  "The entity to use",
 				},
 			},
 		},
@@ -263,9 +253,9 @@ func main() {
 					EnvVar: "BW2_DEFAULT_ENTITY",
 				},
 				cli.StringFlag{
-					Name:  "entity,e",
-					Value: "~/.savepoint.ent",
-					Usage: "The entity to use",
+					Name:   "entity,e",
+					EnvVar: "BW2_DEFAULT_ENTITY",
+					Usage:  "The entity to use",
 				},
 			},
 		},
