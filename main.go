@@ -5,11 +5,8 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/gtfierro/savepoint/api"
 	bw "gopkg.in/immesys/bw2bind.v5"
-	"io"
 	"log"
 	"os"
-	"os/user"
-	"path/filepath"
 	"strings"
 )
 
@@ -97,27 +94,6 @@ func rmConfig(c *cli.Context) error {
 		if err != nil {
 			log.Fatal(err)
 		}
-	}
-	return nil
-}
-
-func setDefaultEntity(c *cli.Context) error {
-	user, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-	entityFile := c.String("entity")
-	file, err := os.Create(filepath.Join(user.HomeDir, ".savepoint.ent"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	entity, err := os.Open(entityFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = io.Copy(file, entity)
-	if err != nil {
-		log.Fatal(err)
 	}
 	return nil
 }
@@ -238,24 +214,6 @@ func main() {
 					Name:  "uri,u",
 					Value: "scratch.ns/*",
 					Usage: "Base URI to scan for metadata matching !meta/giles",
-				},
-				cli.StringFlag{
-					Name:   "entity,e",
-					EnvVar: "BW2_DEFAULT_ENTITY",
-					Usage:  "The entity to use",
-				},
-			},
-		},
-		{
-			Name:   "setEntity",
-			Usage:  "Set default entity for this utility to use",
-			Action: setDefaultEntity,
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:   "entity,e",
-					Value:  "",
-					Usage:  "The entity to use",
-					EnvVar: "BW2_DEFAULT_ENTITY",
 				},
 				cli.StringFlag{
 					Name:   "entity,e",
