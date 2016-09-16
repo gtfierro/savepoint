@@ -75,23 +75,21 @@ func ReadConfig(filename string) (*Config, error) {
 	if err := yaml.Unmarshal(bytes, config); err != nil {
 		return config, errors.Wrap(err, "Could not unmarshal config file")
 	}
-	//if config.Prefix == "" {
-	//	return config, errors.New("Need to provide prefix")
-	//}
 	config.Prefix = strings.TrimSuffix(config.Prefix, "/")
 
 	if len(config.DummyArchiveRequests) == 0 {
 		return config, errors.New("Need to provide archive requests")
 	}
-	for _, req := range config.DummyArchiveRequests {
+	for i, req := range config.DummyArchiveRequests {
 		req.ArchiveURI = config.Prefix + "/" + strings.TrimPrefix(req.ArchiveURI, "/")
+		req.AttachURI = config.Prefix + "/" + strings.TrimPrefix(req.AttachURI, "/")
 		if req.PO == "" {
 			req.PO = "2.0.0.0"
 		}
 		for idx, uri := range req.MetadataURIs {
 			req.MetadataURIs[idx] = config.Prefix + "/" + strings.TrimPrefix(uri, "/")
 		}
-		//config.ArchiveRequests = append(config.ArchiveRequests, req.ToArchiveRequest())
+		config.DummyArchiveRequests[i] = req
 	}
 
 	return config, nil
