@@ -116,7 +116,7 @@ func main() {
 				cli.StringFlag{
 					Name:  "value,v",
 					Value: "key1",
-					Usage: "REQUIRED. The objectbuilder expression for where the value is in messages published on the URI (see https://github.com/gtfierro/giles2/tree/master/objectbuilder)",
+					Usage: "REQUIRED. The objectbuilder expression for where the value is in messages published on the URI (see https://github.com/gtfierro/ob)",
 				},
 				cli.StringFlag{
 					Name:  "time,t",
