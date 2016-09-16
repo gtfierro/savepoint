@@ -71,8 +71,9 @@ func addConfig(c *cli.Context) error {
 	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
-	for _, req := range config.ArchiveRequests {
-		err := API.AttachArchiveRequests(req.URI, req)
+	for _, req := range config.DummyArchiveRequests {
+		archiveRequest := req.ToArchiveRequest()
+		err := API.AttachArchiveRequests(req.AttachURI, archiveRequest)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -89,8 +90,8 @@ func rmConfig(c *cli.Context) error {
 	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
-	for _, req := range config.ArchiveRequests {
-		err := API.RemoveArchiveRequests(req.URI, false)
+	for _, req := range config.DummyArchiveRequests {
+		err := API.RemoveArchiveRequests(req.AttachURI, false)
 		if err != nil {
 			log.Fatal(err)
 		}

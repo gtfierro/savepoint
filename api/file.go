@@ -23,12 +23,13 @@ import (
 type Config struct {
 	Prefix               string                `yaml:"Prefix"`
 	DummyArchiveRequests []DummyArchiveRequest `yaml:"Archive"`
-	ArchiveRequests      []*ArchiveRequest
+	//ArchiveRequests      []*ArchiveRequest
 }
 
 type DummyArchiveRequest struct {
-	URI             string   `yaml:"URI"`
-	PO              int      `yaml:"PO"`
+	AttachURI       string   `yaml:"AttachURI"`
+	ArchiveURI      string   `yaml:"ArchiveURI"`
+	PO              string   `yaml:"PO"`
 	UUID            string   `yaml:"UUID"`
 	Value           string   `yaml:"Value"`
 	Time            string   `yaml:"Time"`
@@ -44,9 +45,9 @@ func (d DummyArchiveRequest) ToArchiveRequest() *ArchiveRequest {
 	if d.InheritMetadata == "false" {
 		doinherit = false
 	}
-	return &ArchiveRequest{
-		URI:             d.URI,
-		PO:              d.PO,
+	req := &ArchiveRequest{
+		URI:             d.ArchiveURI,
+		PO:              bw.FromDotForm(d.PO),
 		UUID:            d.UUID,
 		Value:           d.Value,
 		Time:            d.Time,
@@ -56,6 +57,12 @@ func (d DummyArchiveRequest) ToArchiveRequest() *ArchiveRequest {
 		MetadataBlock:   d.MetadataBlock,
 		MetadataExpr:    d.MetadataExpr,
 	}
+
+	if d.AttachURI == "" {
+		d.AttachURI = d.ArchiveURI
+	}
+
+	return req
 }
 
 func ReadConfig(filename string) (*Config, error) {
@@ -68,23 +75,23 @@ func ReadConfig(filename string) (*Config, error) {
 	if err := yaml.Unmarshal(bytes, config); err != nil {
 		return config, errors.Wrap(err, "Could not unmarshal config file")
 	}
-	if config.Prefix == "" {
-		return config, errors.New("Need to provide prefix")
-	}
+	//if config.Prefix == "" {
+	//	return config, errors.New("Need to provide prefix")
+	//}
 	config.Prefix = strings.TrimSuffix(config.Prefix, "/")
 
 	if len(config.DummyArchiveRequests) == 0 {
 		return config, errors.New("Need to provide archive requests")
 	}
 	for _, req := range config.DummyArchiveRequests {
-		req.URI = config.Prefix + "/" + strings.TrimPrefix(req.URI, "/")
-		if req.PO == 0 {
-			req.PO = bw.FromDotForm("2.0.0.0")
+		req.ArchiveURI = config.Prefix + "/" + strings.TrimPrefix(req.ArchiveURI, "/")
+		if req.PO == "" {
+			req.PO = "2.0.0.0"
 		}
 		for idx, uri := range req.MetadataURIs {
 			req.MetadataURIs[idx] = config.Prefix + "/" + strings.TrimPrefix(uri, "/")
 		}
-		config.ArchiveRequests = append(config.ArchiveRequests, req.ToArchiveRequest())
+		//config.ArchiveRequests = append(config.ArchiveRequests, req.ToArchiveRequest())
 	}
 
 	return config, nil
