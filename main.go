@@ -19,11 +19,10 @@ func applyArchive(c *cli.Context) error {
 	request := api.ArchiveRequest{
 		URI:             c.String("uri"),
 		PO:              bw.FromDotForm(c.String("po")),
-		Value:           c.String("value"),
-		Time:            c.String("time"),
-		UUID:            c.String("uuid"),
+		ValueExpr:       c.String("value"),
+		TimeExpr:        c.String("time"),
+		UUIDExpr:        c.String("uuid"),
 		InheritMetadata: c.BoolT("inheritMetadata"),
-		MetadataURIs:    c.StringSlice("metadataURI"),
 	}
 	err := API.AttachArchiveRequests(uri, &request)
 	if err != nil {
@@ -37,6 +36,9 @@ func removeRequest(c *cli.Context) error {
 	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
+	if c.String("uri") == "" {
+		return fmt.Errorf("Need URI")
+	}
 	uri := strings.TrimSuffix(c.String("uri"), "/")
 	err := API.RemoveArchiveRequests(uri, false)
 	if err != nil {
@@ -50,6 +52,9 @@ func scanRequests(c *cli.Context) error {
 	vk := client.SetEntityFileOrExit(c.String("entity"))
 	client.OverrideAutoChainTo(true)
 	API := api.NewAPI(client, vk)
+	if c.String("uri") == "" {
+		return fmt.Errorf("Need URI")
+	}
 	uri := strings.TrimSuffix(c.String("uri"), "/")
 	requests, err := API.GetArchiveRequests(uri)
 	if err != nil {
@@ -102,7 +107,7 @@ func rmConfig(c *cli.Context) error {
 func main() {
 	app := cli.NewApp()
 	app.Name = "savepoint"
-	app.Version = "0.0.5"
+	app.Version = "0.0.6"
 
 	app.Commands = []cli.Command{
 		{
@@ -142,10 +147,6 @@ func main() {
 				cli.BoolTFlag{
 					Name:  "inheritMetadata,i",
 					Usage: "OPTIONAL. Defaults to true. Inherits metadata from all URI prefixes",
-				},
-				cli.StringSliceFlag{
-					Name:  "metadataURI,mu",
-					Usage: "OPTIONAL. Specifies base uri <uri>/!meta/+ for metadata keys",
 				},
 				cli.StringFlag{
 					Name:   "entity,e",
@@ -195,7 +196,6 @@ func main() {
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "uri,u",
-					Value: "",
 					Usage: "URI to remove metadata !meta/giles from",
 				},
 				cli.StringFlag{
@@ -213,7 +213,6 @@ func main() {
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "uri,u",
-					Value: "scratch.ns/*",
 					Usage: "Base URI to scan for metadata matching !meta/giles",
 				},
 				cli.StringFlag{

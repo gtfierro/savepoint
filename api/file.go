@@ -23,21 +23,18 @@ import (
 type Config struct {
 	Prefix               string                `yaml:"Prefix"`
 	DummyArchiveRequests []DummyArchiveRequest `yaml:"Archive"`
-	//ArchiveRequests      []*ArchiveRequest
 }
 
 type DummyArchiveRequest struct {
-	AttachURI       string   `yaml:"AttachURI"`
-	ArchiveURI      string   `yaml:"ArchiveURI"`
-	PO              string   `yaml:"PO"`
-	UUID            string   `yaml:"UUID"`
-	Value           string   `yaml:"Value"`
-	Time            string   `yaml:"Time"`
-	TimeParse       string   `yaml:"TimeParse"`
-	InheritMetadata string   `yaml:"InheritMetadata",omitempty`
-	MetadataURIs    []string `yaml:"MetadataURIs"`
-	MetadataBlock   string   `yaml:"MetadataBlock"`
-	MetadataExpr    string   `yaml:"MetadataExpr"`
+	AttachURI       string `yaml:"AttachURI"`
+	ArchiveURI      string `yaml:"ArchiveURI"`
+	PO              string `yaml:"PO"`
+	UUIDExpr        string `yaml:"UUID"`
+	ValueExpr       string `yaml:"Value"`
+	TimeExpr        string `yaml:"Time"`
+	TimeParse       string `yaml:"TimeParse"`
+	Name            string `yaml:"Name"`
+	InheritMetadata string `yaml:"InheritMetadata",omitempty`
 }
 
 func (d DummyArchiveRequest) ToArchiveRequest() *ArchiveRequest {
@@ -45,17 +42,16 @@ func (d DummyArchiveRequest) ToArchiveRequest() *ArchiveRequest {
 	if d.InheritMetadata == "false" {
 		doinherit = false
 	}
+	fmt.Println("NAMe", d.Name)
 	req := &ArchiveRequest{
 		URI:             d.ArchiveURI,
 		PO:              bw.FromDotForm(d.PO),
-		UUID:            d.UUID,
-		Value:           d.Value,
-		Time:            d.Time,
+		UUIDExpr:        d.UUIDExpr,
+		ValueExpr:       d.ValueExpr,
+		TimeExpr:        d.TimeExpr,
 		TimeParse:       d.TimeParse,
+		Name:            d.Name,
 		InheritMetadata: doinherit,
-		MetadataURIs:    d.MetadataURIs,
-		MetadataBlock:   d.MetadataBlock,
-		MetadataExpr:    d.MetadataExpr,
 	}
 
 	if d.AttachURI == "" {
@@ -85,9 +81,6 @@ func ReadConfig(filename string) (*Config, error) {
 		req.AttachURI = config.Prefix + "/" + strings.TrimPrefix(req.AttachURI, "/")
 		if req.PO == "" {
 			req.PO = "2.0.0.0"
-		}
-		for idx, uri := range req.MetadataURIs {
-			req.MetadataURIs[idx] = config.Prefix + "/" + strings.TrimPrefix(uri, "/")
 		}
 		config.DummyArchiveRequests[i] = req
 	}

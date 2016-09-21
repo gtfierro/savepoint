@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	messages "github.com/gtfierro/giles2/plugins/bosswave"
+	messages "github.com/gtfierro/durandal/archiver"
 	"github.com/pkg/errors"
 	bw "gopkg.in/immesys/bw2bind.v5"
 	"strings"
@@ -40,16 +40,16 @@ What does the API need to do?
 //     	// OPTIONAL. If provided, this is used as the stream UUID.  If not
 //     	// provided, then a UUIDv3 with NAMESPACE_UUID and the URI, PO type and
 //     	// Value are used.
-//     	UUID string
+//     	UUIDExpr string
 //
 //     	// expression determining how to extract the value from the received
 //     	// message
-//     	Value string
+//     	ValueExpr string
 //
 //     	// OPTIONAL. Expression determining how to extract the value from the
 //     	// received message. If not included, it uses the time the message was
 //     	// received on the server.
-//     	Time string
+//     	TimeExpr string
 //
 //     	// OPTIONAL. Golang time parse string
 //     	TimeParse string
@@ -58,17 +58,7 @@ What does the API need to do?
 //     	// which inherits metadata from each of its components
 //     	InheritMetadata bool
 //
-//     	// OPTIONAL. a list of base URIs to scan for metadata. If `<uri>` is provided, we
-//     	// scan `<uri>/!meta/+` for metadata keys/values
-//     	MetadataURIs []string
-//
-//     	// OPTIONAL. a URI terminating in a metadata key that contains some kv
-//     	// structure of metadata, for example `/a/b/c/!meta/metadatahere`
-//     	MetadataBlock string
-//
-//     	// OPTIONAL. a ObjectBuilder expression to search in the current message
-//     	// for metadata
-//     	MetadataExpr string
+//		Name string
 //     }
 type ArchiveRequest messages.ArchiveRequest
 
@@ -77,14 +67,12 @@ func (req *ArchiveRequest) SameAs(other *ArchiveRequest) bool {
 	return (req != nil && other != nil) &&
 		(req.URI == other.URI) &&
 		(req.PO == other.PO) &&
-		(req.UUID == other.UUID) &&
-		(req.Value == other.Value) &&
-		(req.Time == other.Time) &&
+		(req.UUIDExpr == other.UUIDExpr) &&
+		(req.ValueExpr == other.ValueExpr) &&
+		(req.TimeExpr == other.TimeExpr) &&
 		(req.TimeParse == other.TimeParse) &&
-		(req.InheritMetadata == other.InheritMetadata) &&
-		(compareStringSliceAsSet(req.MetadataURIs, other.MetadataURIs)) &&
-		(req.MetadataBlock == other.MetadataBlock) &&
-		(req.MetadataExpr == other.MetadataExpr)
+		(req.Name == other.Name) &&
+		(req.InheritMetadata == other.InheritMetadata)
 }
 
 func (req *ArchiveRequest) Dump() {
@@ -124,8 +112,11 @@ func (api *API) AttachArchiveRequests(uri string, requests ...*ArchiveRequest) e
 		if request.PO == 0 {
 			return errors.New("Need a valid PO number")
 		}
-		if request.Value == "" {
+		if request.ValueExpr == "" {
 			return errors.New("Need a Value expression")
+		}
+		if request.Name == "" {
+			return errors.New("Need a Name")
 		}
 	}
 
@@ -181,7 +172,7 @@ func (api *API) GetArchiveRequests(uri string) ([]*ArchiveRequest, error) {
 	}
 	for msg := range queryResults {
 		for _, po := range msg.POs {
-			if po.IsTypeDF(messages.GilesArchiveRequestPIDString) {
+			if po.IsTypeDF(bw.PODFGilesArchiveRequest) {
 				var req = new(ArchiveRequest)
 				if err := po.(bw.MsgPackPayloadObject).ValueInto(&req); err != nil {
 					return requests, err
