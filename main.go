@@ -107,6 +107,7 @@ func rmConfig(c *cli.Context) error {
 func main() {
 	app := cli.NewApp()
 	app.Name = "savepoint"
+	app.Usage = "Utility for managing Archive Requests"
 	app.Version = "0.0.6"
 
 	app.Commands = []cli.Command{

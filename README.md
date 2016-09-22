@@ -10,7 +10,7 @@ USAGE:
    savepoint [global options] command [command options] [arguments...]
 
 VERSION:
-   0.0.5
+   0.0.6
 
 COMMANDS:
      archive  Request that a given URI be archived
