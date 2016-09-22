@@ -43,6 +43,7 @@ type ArchiveRequest struct {
      	// on <uri>/!meta/giles, then if the URI field was elided it would default
      	// to <uri>.
      	URI string
+     	Name string
 
      	// Extracts objects of the given Payload Object type from all messages
      	// published on the URI. If elided, operates on all PO types.
@@ -68,18 +69,6 @@ type ArchiveRequest struct {
      	// OPTIONAL. Defaults to true. If true, the archiver will call bw2bind's "GetMetadata" on the archived URI,
      	// which inherits metadata from each of its components
      	InheritMetadata bool
-
-     	// OPTIONAL. a list of base URIs to scan for metadata. If `<uri>` is provided, we
-     	// scan `<uri>/!meta/+` for metadata keys/values
-     	MetadataURIs []string
-
-     	// OPTIONAL. a URI terminating in a metadata key that contains some kv
-     	// structure of metadata, for example `/a/b/c/!meta/metadatahere`
-     	MetadataBlock string
-
-     	// OPTIONAL. a ObjectBuilder expression to search in the current message
-     	// for metadata
-     	MetadataExpr string
 }
 ```
 
@@ -94,7 +83,8 @@ specifies where they should be placed. This is a simple, straightforward way to 
 Prefix: scratch.ns/abc/def
 # list of archive requests. Each entry is the set of key-value pairs comprising an archive request
 Archive:
-	- URI: s.top/pantry/i.top/signal/cpu
+	- AttachURI: s.top
+	  ArchiveURI: s.top/pantry/i.top/signal/cpu
 	  Value: Value
  	  MetadataInherit: true
 ```
